@@ -38,3 +38,5 @@ Extract text from any document. No muss. No fuss.
 
 .. |Forks| image:: https://img.shields.io/github/forks/deanmalmgren/textract.svg
     :target: https://github.com/deanmalmgren/textract/network
+
+This fork is intended to fix some of the unaddressed bugs that exist in the original, particularly on Windows.

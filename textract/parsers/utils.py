@@ -4,7 +4,7 @@ reused in many of the other parser modules.
 
 import subprocess
 import tempfile
-import os
+import os, sys
 import errno
 
 import six
@@ -82,6 +82,21 @@ class ShellParser(BaseParser):
         """
 
         # run a subprocess and put the stdout and stderr on the pipe object
+        if args[0][-3:] == '.py' and os.name == 'nt':
+            # windows needs a little help to run python scripts
+            try:
+                pipe = subprocess.Popen(
+                    ["where.exe", args[0]],
+                    stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                )
+            except Exception as e:
+                raise exceptions.ShellError(
+                    str(e), 127, '', '',
+                )
+            stdout, stderr = pipe.communicate()
+            args[0] = stdout.strip() if stdout else args[0]
+            args.insert(0, sys.executable)
+
         try:
             pipe = subprocess.Popen(
                 args,
@@ -100,6 +115,9 @@ class ShellParser(BaseParser):
         stdout, stderr = pipe.communicate()
 
         # if pipe is busted, raise an error (unlike Fabric)
+        print(stdout)
+        print(stderr)
+        print(pipe.returncode)
         if pipe.returncode != 0:
             raise exceptions.ShellError(
                 ' '.join(args), pipe.returncode, stdout, stderr,
